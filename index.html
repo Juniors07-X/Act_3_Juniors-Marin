@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro Académico | Sistema de Gestión de Estudiantes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,500;0,600;0,700;1,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #EFEAE0;
+    --paper-line: #D9D2C1;
+    --ink: #23262B;
+    --ink-soft: #5B5A54;
+    --burgundy: #7A2E2E;
+    --burgundy-dark: #5C2222;
+    --gold: #B08D57;
+    --green: #2F5233;
+    --green-bg: #E4EBDD;
+    --red: #8C2F2F;
+    --red-bg: #F1E1DE;
+    --card-bg: #FBF9F4;
+    --shadow: 0 1px 0 rgba(35,38,43,0.06), 0 8px 20px -12px rgba(35,38,43,0.25);
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    background:
+      repeating-linear-gradient(180deg, transparent 0px, transparent 34px, var(--paper-line) 35px),
+      var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height:100vh;
+    padding-bottom: 60px;
+  }
+
+  /* Ledger perforation rail */
+  .rail{
+    position: fixed;
+    top:0; left:0; bottom:0;
+    width: 26px;
+    background: var(--burgundy);
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 18px;
+    padding-top: 24px;
+    z-index: 5;
+  }
+  .rail span{
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--paper);
+    opacity:.85;
+  }
+
+  header.masthead{
+    margin-left: 26px;
+    padding: 42px 48px 26px 56px;
+    border-bottom: 3px double var(--ink);
+    background: linear-gradient(180deg, rgba(251,249,244,0.6), rgba(251,249,244,0));
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    font-size: 11.5px;
+    color: var(--burgundy);
+    margin: 0 0 10px 0;
+    font-weight: 600;
+  }
+  h1{
+    font-family:'Source Serif 4', serif;
+    font-weight: 700;
+    font-size: clamp(28px, 4vw, 42px);
+    margin: 0 0 8px 0;
+    letter-spacing: -0.01em;
+  }
+  .subtitle{
+    color: var(--ink-soft);
+    font-size: 15px;
+    max-width: 640px;
+    line-height: 1.5;
+    margin:0;
+  }
+
+  main{
+    margin-left: 26px;
+    padding: 34px 48px 20px 56px;
+    display: grid;
+    grid-template-columns: minmax(320px, 420px) 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  @media (max-width: 980px){
+    main{ grid-template-columns: 1fr; }
+  }
+
+  .card{
+    background: var(--card-bg);
+    border: 1px solid var(--paper-line);
+    border-radius: 3px;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+  .card::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height:4px;
+    background: var(--gold);
+  }
+
+  .card-head{
+    padding: 20px 24px 14px 24px;
+    border-bottom: 1px solid var(--paper-line);
+    display:flex;
+    align-items:baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .card-head h2{
+    font-family:'Source Serif 4', serif;
+    font-size: 19px;
+    margin:0;
+    font-weight: 600;
+  }
+  .card-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    letter-spacing: .06em;
+  }
+
+  form{ padding: 22px 24px 24px 24px; }
+
+  .field{ margin-bottom: 16px; }
+  .field label{
+    display:block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .field .hint{
+    font-size: 11px;
+    color: var(--ink-soft);
+    font-weight: 400;
+    margin-left: 6px;
+  }
+  .field input{
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #C9C2AF;
+    border-radius: 2px;
+    background: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .field input:focus{
+    outline: none;
+    border-color: var(--burgundy);
+    box-shadow: 0 0 0 3px rgba(122,46,46,0.12);
+  }
+  .field input.invalid{
+    border-color: var(--red);
+    background: #FBF2F1;
+  }
+  .field .error-msg{
+    font-size: 11.5px;
+    color: var(--red);
+    margin-top: 5px;
+    min-height: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .grid-3{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .btn-row{
+    display:flex;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  button{
+    font-family:'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 13.5px;
+    border: none;
+    border-radius: 2px;
+    padding: 11px 18px;
+    cursor: pointer;
+    transition: transform .08s ease, filter .12s ease;
+  }
+  button:active{ transform: translateY(1px); }
+  .btn-primary{
+    background: var(--burgundy);
+    color: #FBF9F4;
+    flex: 1;
+  }
+  .btn-primary:hover{ filter: brightness(1.08); }
+  .btn-ghost{
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1px solid #C9C2AF;
+  }
+  .btn-ghost:hover{ background: #efe9dc; }
+
+  .search-bar{
+    padding: 18px 24px;
+    display:flex;
+    gap: 10px;
+    border-bottom: 1px solid var(--paper-line);
+    flex-wrap: wrap;
+  }
+  .search-bar input{
+    flex: 1;
+    min-width: 180px;
+    padding: 10px 12px;
+    border: 1px solid #C9C2AF;
+    border-radius: 2px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+  }
+  .search-bar input:focus{ outline:none; border-color: var(--burgundy); }
+  .btn-search{ background: var(--ink); color:#fff; }
+  .btn-clear{ background: transparent; color: var(--ink-soft); border:1px solid #C9C2AF; }
+
+  .table-wrap{ overflow-x: auto; }
+  table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  thead th{
+    text-align: left;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    padding: 10px 14px;
+    border-bottom: 2px solid var(--ink);
+    white-space: nowrap;
+  }
+  tbody td{
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--paper-line);
+    vertical-align: middle;
+  }
+  tbody tr:hover{ background: rgba(176,141,87,0.08); }
+  .doc-cell{
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+  }
+  .name-cell{ font-weight: 600; }
+  .program-cell{ color: var(--ink-soft); }
+  .avg-cell{
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+  }
+  .badge{
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .badge-pass{ background: var(--green-bg); color: var(--green); }
+  .badge-fail{ background: var(--red-bg); color: var(--red); }
+
+  .action-btn{
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 5px 9px;
+    border-radius: 2px;
+    margin-right: 4px;
+  }
+  .action-edit{ color: var(--burgundy); border: 1px solid var(--burgundy); }
+  .action-edit:hover{ background: var(--burgundy); color: #fff; }
+  .action-del{ color: var(--red); border: 1px solid var(--red); }
+  .action-del:hover{ background: var(--red); color: #fff; }
+
+  .empty-state{
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--ink-soft);
+  }
+  .empty-state .glyph{
+    font-family: 'Source Serif 4', serif;
+    font-size: 34px;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .empty-state p{ margin: 4px 0; font-size: 13.5px; }
+
+  .count-strip{
+    padding: 12px 24px;
+    display:flex;
+    gap: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--paper-line);
+    flex-wrap: wrap;
+  }
+  .count-strip b{ color: var(--ink); }
+
+  .toast{
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: #FBF9F4;
+    padding: 12px 20px;
+    border-radius: 3px;
+    font-size: 13.5px;
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0 12px 30px -10px rgba(0,0,0,0.4);
+    opacity: 0;
+    pointer-events:none;
+    transition: opacity .2s ease, transform .2s ease;
+    z-index: 50;
+    border-left: 4px solid var(--gold);
+  }
+  .toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.err{ border-left-color: var(--red); }
+
+  footer{
+    margin-left: 26px;
+    padding: 24px 48px 40px 56px;
+    color: var(--ink-soft);
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<div class="rail" aria-hidden="true">
+  <span></span><span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<header class="masthead">
+  <p class="eyebrow">Coordinación Académica · Actividad Entregable No. 3</p>
+  <h1>Registro de Estudiantes</h1>
+  <p class="subtitle">Aplicación para registrar, consultar, actualizar y eliminar información de estudiantes, con cálculo automático de nota definitiva y estado. Datos administrados mediante arreglos y objetos de JavaScript, sin base de datos ni frameworks.</p>
+</header>
+
+<main>
+  <!-- FORM CARD -->
+  <section class="card">
+    <div class="card-head">
+      <h2 id="formTitle">Nuevo registro</h2>
+      <span class="card-tag">FICHA 01</span>
+    </div>
+    <form id="studentForm" novalidate>
+      <div class="field">
+        <label for="documento">Documento <span class="hint">solo números</span></label>
+        <input type="text" id="documento" inputmode="numeric" autocomplete="off" placeholder="Ej: 1020304050">
+        <div class="error-msg" id="err-documento"></div>
+      </div>
+
+      <div class="field">
+        <label for="nombre">Nombre completo</label>
+        <input type="text" id="nombre" autocomplete="off" placeholder="Ej: Juniors Stivens Marin Lopez">
+        <div class="error-msg" id="err-nombre"></div>
+      </div>
+
+      <div class="field">
+        <label for="programa">Programa académico</label>
+        <input type="text" id="programa" autocomplete="off" placeholder="Ej: Ingeniería de Sistemas">
+        <div class="error-msg" id="err-programa"></div>
+      </div>
+
+      <div class="field">
+        <label>Notas <span class="hint">rango permitido 0.0 – 5.0</span></label>
+        <div class="grid-3">
+          <div>
+            <input type="text" id="nota1" inputmode="decimal" placeholder="Nota 1">
+            <div class="error-msg" id="err-nota1"></div>
+          </div>
+          <div>
+            <input type="text" id="nota2" inputmode="decimal" placeholder="Nota 2">
+            <div class="error-msg" id="err-nota2"></div>
+          </div>
+          <div>
+            <input type="text" id="nota3" inputmode="decimal" placeholder="Nota 3">
+            <div class="error-msg" id="err-nota3"></div>
+          </div>
+        </div>
+      </div>
+
+      <input type="hidden" id="editingDocumento" value="">
+
+      <div class="btn-row">
+        <button type="submit" class="btn-primary" id="submitBtn">Guardar estudiante</button>
+        <button type="button" class="btn-ghost" id="cancelBtn" style="display:none;">Cancelar</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- TABLE CARD -->
+  <section class="card">
+    <div class="card-head">
+      <h2>Listado general</h2>
+      <span class="card-tag">FICHA 02</span>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Buscar por número de documento…" inputmode="numeric">
+      <button class="btn-search" id="searchBtn" type="button">Buscar</button>
+      <button class="btn-clear" id="clearSearchBtn" type="button">Ver todos</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Documento</th>
+            <th>Nombre</th>
+            <th>Programa</th>
+            <th>Promedio</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <div class="glyph">✎</div>
+        <p><strong>Aún no hay estudiantes registrados.</strong></p>
+        <p>Usa el formulario de la izquierda para crear la primera ficha.</p>
+      </div>
+    </div>
+
+    <div class="count-strip">
+      <span>Total: <b id="countTotal">0</b></span>
+      <span>Aprobados: <b id="countPass">0</b></span>
+      <span>Reprobados: <b id="countFail">0</b></span>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Juniors Stivens Marin Lopez · Uniempresarial · Lenguajes de Programación · Actividad Entregable No. 3
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   MODELO DE DATOS
+   Toda la información se maneja mediante un arreglo de objetos
+   en memoria (sin bases de datos). Se usa localStorage únicamente
+   como respaldo de persistencia local del navegador.
+============================================================ */
+const STORAGE_KEY = "registro_estudiantes_v1";
+let estudiantes = [];
+
+function cargarDatos(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    estudiantes = raw ? JSON.parse(raw) : [];
+  }catch(e){
+    estudiantes = [];
+  }
+}
+
+function guardarDatos(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(estudiantes));
+  }catch(e){ /* almacenamiento no disponible: se continúa solo en memoria */ }
+}
+
+/* ============================================================
+   UTILIDADES DE CÁLCULO
+============================================================ */
+function calcularPromedio(n1, n2, n3){
+  return (n1 + n2 + n3) / 3;
+}
+
+function calcularEstado(promedio){
+  return promedio >= 3.0 ? "Aprobado" : "Reprobado";
+}
+
+/* ============================================================
+   VALIDACIÓN
+============================================================ */
+function esSoloNumeros(valor){
+  return /^[0-9]+$/.test(valor.trim());
+}
+
+function esNotaValida(valor){
+  if(!/^\d+(\.\d+)?$/.test(valor.trim())) return false;
+  const n = parseFloat(valor);
+  return n >= 0 && n <= 5;
+}
+
+function limpiarErrores(){
+  document.querySelectorAll(".error-msg").forEach(e => e.textContent = "");
+  document.querySelectorAll("input").forEach(i => i.classList.remove("invalid"));
+}
+
+function marcarError(campoId, mensaje){
+  const input = document.getElementById(campoId);
+  const err = document.getElementById("err-" + campoId);
+  if(input) input.classList.add("invalid");
+  if(err) err.textContent = mensaje;
+}
+
+function validarFormulario(datos, documentoOriginal){
+  limpiarErrores();
+  let valido = true;
+
+  if(datos.documento.trim() === ""){
+    marcarError("documento", "El documento es obligatorio.");
+    valido = false;
+  } else if(!esSoloNumeros(datos.documento)){
+    marcarError("documento", "El documento solo acepta números.");
+    valido = false;
+  } else {
+    const existe = estudiantes.some(e => e.documento === datos.documento);
+    const esEdicionMismoDoc = documentoOriginal !== null && documentoOriginal === datos.documento;
+    if(existe && !esEdicionMismoDoc){
+      marcarError("documento", "Ese documento ya está registrado.");
+      valido = false;
+    }
+  }
+
+  if(datos.nombre.trim() === ""){
+    marcarError("nombre", "El nombre completo es obligatorio.");
+    valido = false;
+  }
+
+  if(datos.programa.trim() === ""){
+    marcarError("programa", "El programa académico es obligatorio.");
+    valido = false;
+  }
+
+  ["nota1","nota2","nota3"].forEach((campo, idx) => {
+    const valor = datos[campo];
+    if(valor.trim() === ""){
+      marcarError(campo, "Requerida.");
+      valido = false;
+    } else if(!esNotaValida(valor)){
+      marcarError(campo, "Debe ser un número entre 0 y 5.");
+      valido = false;
+    }
+  });
+
+  return valido;
+}
+
+/* ============================================================
+   RENDERIZADO DE TABLA
+============================================================ */
+function renderTabla(lista){
+  const tbody = document.getElementById("tableBody");
+  const emptyState = document.getElementById("emptyState");
+  tbody.innerHTML = "";
+
+  if(lista.length === 0){
+    emptyState.style.display = "block";
+  } else {
+    emptyState.style.display = "none";
+    lista.forEach(est => {
+      const promedio = calcularPromedio(est.nota1, est.nota2, est.nota3);
+      const estado = calcularEstado(promedio);
+      const badgeClass = estado === "Aprobado" ? "badge-pass" : "badge-fail";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="doc-cell">${escapeHtml(est.documento)}</td>
+        <td class="name-cell">${escapeHtml(est.nombre)}</td>
+        <td class="program-cell">${escapeHtml(est.programa)}</td>
+        <td class="avg-cell">${promedio.toFixed(2)}</td>
+        <td><span class="badge ${badgeClass}">${estado}</span></td>
+        <td>
+          <button class="action-btn action-edit" data-doc="${escapeHtml(est.documento)}" data-action="edit">Editar</button>
+          <button class="action-btn action-del" data-doc="${escapeHtml(est.documento)}" data-action="del">Eliminar</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  actualizarConteo(lista);
+}
+
+function actualizarConteo(lista){
+  const total = estudiantes.length;
+  const aprobados = estudiantes.filter(e => calcularEstado(calcularPromedio(e.nota1,e.nota2,e.nota3)) === "Aprobado").length;
+  const reprobados = total - aprobados;
+  document.getElementById("countTotal").textContent = total;
+  document.getElementById("countPass").textContent = aprobados;
+  document.getElementById("countFail").textContent = reprobados;
+}
+
+function escapeHtml(str){
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/* ============================================================
+   TOAST
+============================================================ */
+let toastTimer = null;
+function mostrarToast(mensaje, esError){
+  const toast = document.getElementById("toast");
+  toast.textContent = mensaje;
+  toast.classList.toggle("err", !!esError);
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
+}
+
+/* ============================================================
+   FORMULARIO: CREAR / EDITAR
+============================================================ */
+const form = document.getElementById("studentForm");
+const formTitle = document.getElementById("formTitle");
+const submitBtn = document.getElementById("submitBtn");
+const cancelBtn = document.getElementById("cancelBtn");
+const editingDocumentoInput = document.getElementById("editingDocumento");
+
+function leerFormulario(){
+  return {
+    documento: document.getElementById("documento").value,
+    nombre: document.getElementById("nombre").value,
+    programa: document.getElementById("programa").value,
+    nota1: document.getElementById("nota1").value,
+    nota2: document.getElementById("nota2").value,
+    nota3: document.getElementById("nota3").value,
+  };
+}
+
+function limpiarFormulario(){
+  form.reset();
+  editingDocumentoInput.value = "";
+  formTitle.textContent = "Nuevo registro";
+  submitBtn.textContent = "Guardar estudiante";
+  cancelBtn.style.display = "none";
+  document.getElementById("documento").disabled = false;
+  limpiarErrores();
+}
+
+form.addEventListener("submit", function(e){
+  e.preventDefault();
+  const datos = leerFormulario();
+  const documentoOriginal = editingDocumentoInput.value || null;
+
+  if(!validarFormulario(datos, documentoOriginal)){
+    mostrarToast("Revisa los campos marcados en el formulario.", true);
+    return;
+  }
+
+  const registro = {
+    documento: datos.documento.trim(),
+    nombre: datos.nombre.trim(),
+    programa: datos.programa.trim(),
+    nota1: parseFloat(datos.nota1),
+    nota2: parseFloat(datos.nota2),
+    nota3: parseFloat(datos.nota3),
+  };
+
+  if(documentoOriginal){
+    // Edición: se conserva el documento original, no se permite cambiarlo
+    const idx = estudiantes.findIndex(e => e.documento === documentoOriginal);
+    if(idx !== -1){
+      registro.documento = documentoOriginal;
+      estudiantes[idx] = registro;
+      mostrarToast("Estudiante actualizado correctamente.");
+    }
+  } else {
+    estudiantes.push(registro);
+    mostrarToast("Estudiante registrado correctamente.");
+  }
+
+  guardarDatos();
+  limpiarFormulario();
+  renderTabla(estudiantes);
+});
+
+cancelBtn.addEventListener("click", limpiarFormulario);
+
+/* ============================================================
+   EDITAR / ELIMINAR (delegación de eventos en la tabla)
+============================================================ */
+document.getElementById("tableBody").addEventListener("click", function(e){
+  const btn = e.target.closest("button[data-action]");
+  if(!btn) return;
+  const doc = btn.getAttribute("data-doc");
+  const accion = btn.getAttribute("data-action");
+
+  if(accion === "edit"){
+    iniciarEdicion(doc);
+  } else if(accion === "del"){
+    eliminarEstudiante(doc);
+  }
+});
+
+function iniciarEdicion(documento){
+  const est = estudiantes.find(e => e.documento === documento);
+  if(!est) return;
+
+  document.getElementById("documento").value = est.documento;
+  document.getElementById("nombre").value = est.nombre;
+  document.getElementById("programa").value = est.programa;
+  document.getElementById("nota1").value = est.nota1;
+  document.getElementById("nota2").value = est.nota2;
+  document.getElementById("nota3").value = est.nota3;
+
+  // El documento y el promedio no se pueden modificar en edición
+  document.getElementById("documento").disabled = true;
+
+  editingDocumentoInput.value = documento;
+  formTitle.textContent = "Editando estudiante";
+  submitBtn.textContent = "Actualizar estudiante";
+  cancelBtn.style.display = "inline-block";
+  limpiarErrores();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function eliminarEstudiante(documento){
+  const est = estudiantes.find(e => e.documento === documento);
+  if(!est) return;
+  const confirmado = confirm(`¿Eliminar el registro de "${est.nombre}" (Doc. ${documento})? Esta acción no se puede deshacer.`);
+  if(!confirmado) return;
+
+  estudiantes = estudiantes.filter(e => e.documento !== documento);
+  guardarDatos();
+
+  // Si se estaba editando ese mismo registro, se limpia el formulario
+  if(editingDocumentoInput.value === documento){
+    limpiarFormulario();
+  }
+
+  mostrarToast("Registro eliminado.");
+  aplicarBusquedaActual();
+}
+
+/* ============================================================
+   BÚSQUEDA POR DOCUMENTO
+============================================================ */
+const searchInput = document.getElementById("searchInput");
+const searchBtn = document.getElementById("searchBtn");
+const clearSearchBtn = document.getElementById("clearSearchBtn");
+
+function aplicarBusquedaActual(){
+  const termino = searchInput.value.trim();
+  if(termino === ""){
+    renderTabla(estudiantes);
+    return;
+  }
+  const resultado = estudiantes.filter(e => e.documento.includes(termino));
+  renderTabla(resultado);
+}
+
+searchBtn.addEventListener("click", aplicarBusquedaActual);
+searchInput.addEventListener("keyup", function(e){
+  if(e.key === "Enter") aplicarBusquedaActual();
+  else aplicarBusquedaActual();
+});
+clearSearchBtn.addEventListener("click", function(){
+  searchInput.value = "";
+  renderTabla(estudiantes);
+});
+
+/* ============================================================
+   ENTRADA NUMÉRICA: bloquear caracteres no permitidos al escribir
+============================================================ */
+document.getElementById("documento").addEventListener("keypress", function(e){
+  if(!/[0-9]/.test(e.key)) e.preventDefault();
+});
+["nota1","nota2","nota3"].forEach(id => {
+  document.getElementById(id).addEventListener("keypress", function(e){
+    if(!/[0-9.]/.test(e.key)) e.preventDefault();
+  });
+});
+searchInput.addEventListener("keypress", function(e){
+  if(!/[0-9]/.test(e.key)) e.preventDefault();
+});
+
+/* ============================================================
+   DATOS DE EJEMPLO (solo si no hay nada guardado aún)
+============================================================ */
+function sembrarDatosEjemplo(){
+  if(estudiantes.length > 0) return;
+  estudiantes = [
+    { documento:"1020304050", nombre:"Juniors Stivens Marin Lopez", programa:"Ingeniería de Sistemas", nota1:4.5, nota2:4.0, nota3:4.8 },
+    { documento:"1102938475", nombre:"Laura Camila Rojas Pena", programa:"Administración de Empresas", nota1:2.0, nota2:2.8, nota3:2.5 },
+    { documento:"1099887766", nombre:"Andres Felipe Torres Diaz", programa:"Ingeniería Industrial", nota1:3.2, nota2:3.5, nota3:3.0 },
+  ];
+  guardarDatos();
+}
+
+/* ============================================================
+   INICIALIZACIÓN
+============================================================ */
+cargarDatos();
+sembrarDatosEjemplo();
+renderTabla(estudiantes);
+</script>
+</body>
+</html>
